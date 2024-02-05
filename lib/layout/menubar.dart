@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:quotesmaker/provider/drawer_provider.dart';
 
-class MenuBar extends StatefulWidget {
-  const MenuBar({Key? key}) : super(key: key);
+class MyMenuBar extends StatefulWidget {
+  const MyMenuBar({Key? key}) : super(key: key);
 
   @override
-  _MenuBarState createState() => _MenuBarState();
+  _MyMenuBarState createState() => _MyMenuBarState();
 }
 
-class _MenuBarState extends State<MenuBar> with SingleTickerProviderStateMixin {
+class _MyMenuBarState extends State<MyMenuBar> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final DrawerProvider _drawerProvider = Provider.of<DrawerProvider>(context);

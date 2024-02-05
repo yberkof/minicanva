@@ -143,13 +143,13 @@ class FileManagementProvider extends ChangeNotifier {
   final StreamController<String> _quoteStreamController = StreamController<String>.broadcast();
 
   Stream<String> get quoteStream => _quoteStreamController.stream;
-  List<List<dynamic>> quotesList = [];
+  List<String> quotesList = [];
 
   generatePicture() async {
     // quotesTextController.clear();
     processingChange(true);
     List<Future<void>> ssList = [];
-    for (List<dynamic> quote in quotesList) {
+    for (String quote in quotesList) {
       Widget quoteWidget = Stack(
         children: [
           ClipRRect(
@@ -177,24 +177,24 @@ class FileManagementProvider extends ChangeNotifier {
                   textAlign: TextAlign.center,
                   text: TextSpan(children: [
                     TextSpan(
-                        text: '${quote[0] ?? ''}',
+                        text: quote ?? '',
                         style: GoogleFonts.getFont(selectedFont,
                             color: selectedTextColor,
                             fontSize: selectedFontSize,
                             fontWeight: selectedFontWeight,
                             height: selectedLineHeight)),
-                    TextSpan(
-                        text: '\n${quote[1] ?? ''}',
-                        style: GoogleFonts.getFont(selectedFont,
-                            color: selectedTextColor,
-                            fontSize: selectedFontSize * 0.5,
-                            fontWeight: selectedFontWeight,
-                            height: selectedLineHeight)),
+                    // TextSpan(
+                    //     text: '\n${quote[1] ?? ''}',
+                    //     style: GoogleFonts.getFont(selectedFont,
+                    //         color: selectedTextColor,
+                    //         fontSize: selectedFontSize * 0.5,
+                    //         fontWeight: selectedFontWeight,
+                    //         height: selectedLineHeight)),
                   ]))),
         ],
       );
       Uint8List output =
-          await screenshotController.captureFromWidget(quoteWidget, delay: const Duration(milliseconds: 0));
+          await screenshotController.captureFromWidget(quoteWidget, delay: const Duration(milliseconds: 1));
       Future<void> imageData =
           download(Stream.fromIterable(output), 'quote_${DateTime.now().microsecondsSinceEpoch}.png');
       ssList.add(imageData);

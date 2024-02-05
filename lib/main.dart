@@ -1,7 +1,5 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:quotesmaker/provider/drawer_provider.dart';
 import 'package:quotesmaker/provider/file_management_provider.dart';
 import 'package:quotesmaker/layout/quote.dart';
@@ -12,14 +10,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
   setPathUrlStrategy();
-  await dotenv.load(fileName: ".env");
-
-  await Firebase.initializeApp(
-      options: FirebaseOptions(
-          apiKey: dotenv.get('apiKey'),
-          appId: dotenv.get('appId'),
-          messagingSenderId: dotenv.get('messagingSenderId'),
-          projectId: dotenv.get('projectId')));
+  // await dotenv.load(fileName: ".env");
+  //
+  // await Firebase.initializeApp(
+  //     options: FirebaseOptions(
+  //         apiKey: dotenv.get('apiKey'),
+  //         appId: dotenv.get('appId'),
+  //         messagingSenderId: dotenv.get('messagingSenderId'),
+  //         projectId: dotenv.get('projectId')));
   runApp(const MyApp());
 }
 
