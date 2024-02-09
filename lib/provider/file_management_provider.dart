@@ -8,6 +8,8 @@ import 'package:download/download.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:quotesmaker/utils/image_widget.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -195,9 +197,25 @@ class FileManagementProvider extends ChangeNotifier {
       );
       Uint8List output =
           await screenshotController.captureFromWidget(quoteWidget, delay: const Duration(milliseconds: 1));
-      Future<void> imageData =
-          download(Stream.fromIterable(output), 'quote_${DateTime.now().microsecondsSinceEpoch}.png');
-      ssList.add(imageData);
+      var filename = 'quote_${DateTime.now().microsecondsSinceEpoch}';
+      // Future<void> imageData =
+      //     download(Stream.fromIterable(output), filename);
+      try {
+
+        final String dir = (await getApplicationDocumentsDirectory()).path;
+        var imagePath = '$dir/file_name${DateTime.now()}.png';
+       var capturedFile = File(imagePath);
+        await capturedFile.writeAsBytes(output);
+        print(capturedFile.path);
+        final result = await ImageGallerySaver.saveImage(output,
+            quality: 60, name: "file_name${DateTime.now()}");
+        print(result);
+        print('png done');
+      } catch (e) {
+        print(e);
+      }
+
+      // ssList.add(imageData);
     }
     await Future.wait([...ssList]);
     processingChange(false);
