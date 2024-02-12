@@ -9,6 +9,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quotesmaker/utils/image_widget.dart';
 import 'package:screenshot/screenshot.dart';
@@ -90,11 +91,16 @@ class FileManagementProvider extends ChangeNotifier {
   }
 
   bool isNetworkImage = false;
-  String backgroundImage = assetImages[4];
+  dynamic backgroundImage = assetImages[4];
 
-  backgroundImageChange(String asset) {
+  backgroundImageChange(String asset) async {
     if (asset == 'assets/random.png') {
       backgroundImage = assetImages[Random().nextInt(assetImages.length)];
+    } else if (asset == 'assets/custom.png') {
+      var image = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        backgroundImage = await image.readAsBytes();
+      }
     } else {
       backgroundImage = asset;
     }
@@ -142,82 +148,30 @@ class FileManagementProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  final StreamController<String> _quoteStreamController = StreamController<String>.broadcast();
+  final StreamController<String> _quoteStreamController =
+      StreamController<String>.broadcast();
 
   Stream<String> get quoteStream => _quoteStreamController.stream;
   List<String> quotesList = [];
 
-  generatePicture() async {
+  generatePicture(Widget widget, BuildContext context) async {
     // quotesTextController.clear();
     processingChange(true);
-    List<Future<void>> ssList = [];
-    for (String quote in quotesList) {
-      Widget quoteWidget = Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(selectedRadius),
-            child: ImageWidget(
-                urlOrPath: backgroundImage == 'assets/random.png'
-                    ? assetImages[Random().nextInt(assetImages.length)]
-                    : backgroundImage,
-                width: selectedWidth,
-                height: selectedHeight,
-                fit: BoxFit.cover),
-          ),
-          Container(
-            width: selectedWidth,
-            height: selectedHeight,
-            padding: const EdgeInsets.all(50),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(selectedRadius), color: selectedColor),
-          ),
-          Container(
-              alignment: align,
-              width: selectedWidth,
-              height: selectedHeight,
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
-              child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(children: [
-                    TextSpan(
-                        text: quote ?? '',
-                        style: GoogleFonts.getFont(selectedFont,
-                            color: selectedTextColor,
-                            fontSize: selectedFontSize,
-                            fontWeight: selectedFontWeight,
-                            height: selectedLineHeight)),
-                    // TextSpan(
-                    //     text: '\n${quote[1] ?? ''}',
-                    //     style: GoogleFonts.getFont(selectedFont,
-                    //         color: selectedTextColor,
-                    //         fontSize: selectedFontSize * 0.5,
-                    //         fontWeight: selectedFontWeight,
-                    //         height: selectedLineHeight)),
-                  ]))),
-        ],
-      );
-      Uint8List output =
-          await screenshotController.captureFromWidget(quoteWidget, delay: const Duration(milliseconds: 1));
-      var filename = 'quote_${DateTime.now().microsecondsSinceEpoch}';
-      // Future<void> imageData =
-      //     download(Stream.fromIterable(output), filename);
-      try {
-
-        final String dir = (await getApplicationDocumentsDirectory()).path;
-        var imagePath = '$dir/file_name${DateTime.now()}.png';
-       var capturedFile = File(imagePath);
-        await capturedFile.writeAsBytes(output);
-        print(capturedFile.path);
-        final result = await ImageGallerySaver.saveImage(output,
-            quality: 60, name: "file_name${DateTime.now()}");
-        print(result);
-        print('png done');
-      } catch (e) {
-        print(e);
-      }
-
-      // ssList.add(imageData);
+    Uint8List output = await screenshotController.captureFromWidget(widget,
+        context: context, delay: const Duration(milliseconds: 1));
+    try {
+      final String dir = (await getApplicationDocumentsDirectory()).path;
+      var imagePath = '$dir/file_name${DateTime.now()}.png';
+      var capturedFile = File(imagePath);
+      await capturedFile.writeAsBytes(output);
+      print(capturedFile.path);
+      final result = await ImageGallerySaver.saveImage(output,
+          quality: 60, name: "file_name${DateTime.now()}");
+      print(result);
+      print('png done');
+    } catch (e) {
+      print(e);
     }
-    await Future.wait([...ssList]);
     processingChange(false);
   }
 
@@ -234,7 +188,10 @@ class FileManagementProvider extends ChangeNotifier {
       final input = File.fromRawPath(fileBytes!).openRead();
       ;
       // final input = File(file.path!).openRead();
-      final fields = await input.transform(utf8.decoder).transform(const CsvToListConverter()).toList();
+      final fields = await input
+          .transform(utf8.decoder)
+          .transform(const CsvToListConverter())
+          .toList();
 
       // csvData = fields;
       // for (var element in fields) {
@@ -248,6 +205,7 @@ class FileManagementProvider extends ChangeNotifier {
 }
 
 List<String> assetImages = [
+  'assets/custom.png',
   'assets/random.png',
   'assets/t1.png',
   'assets/t2.png',

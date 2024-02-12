@@ -4,6 +4,7 @@ import 'package:quotesmaker/provider/drawer_provider.dart';
 import 'package:quotesmaker/provider/file_management_provider.dart';
 import 'package:quotesmaker/layout/quote.dart';
 import 'package:quotesmaker/provider/m_themes.dart';
+import 'package:sizer/sizer.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 void main() async {
@@ -26,23 +27,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => DrawerProvider()),
-          ChangeNotifierProvider(create: (context) => FileManagementProvider()),
-          ChangeNotifierProvider(create: (context) => MthemesProvider()),
-        ],
-        builder: (context, child) {
-          final _themeProvider = Provider.of<MthemesProvider>(context);
-          return MaterialApp(
-            title: 'Mini Canva',
-            debugShowCheckedModeBanner: false,
-            theme: _themeProvider.blueThemeLight,
-            darkTheme: _themeProvider.blueThemeDark,
-            themeMode: _themeProvider.themeMode,
-            home: const QuotePage(),
-          );
-        });
+    return Sizer(
+      builder:(context, orientation, deviceType) =>  MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (context) => DrawerProvider()),
+            ChangeNotifierProvider(create: (context) => FileManagementProvider()),
+            ChangeNotifierProvider(create: (context) => MthemesProvider()),
+          ],
+          builder: (context, child) {
+            final _themeProvider = Provider.of<MthemesProvider>(context);
+            return MaterialApp(
+              title: 'Mini Canva',
+              debugShowCheckedModeBanner: false,
+              theme: _themeProvider.blueThemeLight,
+              darkTheme: _themeProvider.blueThemeDark,
+              themeMode: _themeProvider.themeMode,
+              home: const QuotePage(),
+            );
+          }),
+    );
   }
 }
 

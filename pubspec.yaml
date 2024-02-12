@@ -46,6 +46,8 @@ dependencies:
   glitcheffect: ^1.0.2
   image_gallery_saver:
   path_provider:
+  sizer:
+  image_picker:
 #  firebase_analytics: ^9.1.9
 #  firebase_core: ^1.18.0
   cached_network_image: ^3.2.0

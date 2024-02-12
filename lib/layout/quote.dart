@@ -10,12 +10,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quotesmaker/layout/menubar.dart';
+import 'package:quotesmaker/layout/overlay_widget.dart';
 import 'package:quotesmaker/provider/drawer_provider.dart';
 import 'package:quotesmaker/provider/file_management_provider.dart';
 import 'package:quotesmaker/provider/m_themes.dart';
 import 'package:quotesmaker/utils/image_widget.dart';
 import 'package:quotesmaker/utils/responsive.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:sizer/sizer.dart';
 
 class QuotePage extends StatefulWidget {
   const QuotePage({Key? key}) : super(key: key);
@@ -26,6 +28,8 @@ class QuotePage extends StatefulWidget {
 
 class _QuotePageState extends State<QuotePage> {
   var quoteController = TextEditingController();
+  final ValueNotifier<Matrix4> notifier = ValueNotifier(Matrix4.identity());
+  bool editing = true;
 
   @override
   void initState() {
@@ -44,8 +48,14 @@ class _QuotePageState extends State<QuotePage> {
         Provider.of<FileManagementProvider>(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         actions: [
+          IconButton(
+              onPressed: () => setState(() {
+                    editing = !editing;
+                  }),
+              icon: Icon(editing ? Icons.check : Icons.edit)),
           IconButton(
               onPressed: () => _themeProvider.changeThemeMode(),
               icon: Icon(_themeProvider.themeMode == ThemeMode.light
@@ -58,125 +68,129 @@ class _QuotePageState extends State<QuotePage> {
           visible: !_fileManagementProvider.isProcessing,
           child: FloatingActionButton.extended(
               onPressed: () {
-                _fileManagementProvider.quotesList.add(quoteController.text);
-                _fileManagementProvider.generatePicture();
+                _fileManagementProvider.generatePicture(
+                    getEditor(_fileManagementProvider,
+                        isGeneration: true, isFinal: true),
+                    context);
               },
               label: const Text('Generate'))),
-      drawer: Drawer(
-          elevation: 0,
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const DrawerHeader(
-                    child: Column(
-                  children: [
-                    Text('Customization'),
-                    MyMenuBar(),
-                  ],
-                )),
-                Expanded(
-                    child: items(_fileManagementProvider)[
-                        _drawerProvider.selectedIndex]),
-              ],
-            ),
-          )),
-      endDrawer: Drawer(
-          elevation: 0,
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const DrawerHeader(
-                    child: Column(
-                  children: [
-                    Text('Customization'),
-                    MyMenuBar(),
-                  ],
-                )),
-                Expanded(
-                    child: items(_fileManagementProvider)[
-                        _drawerProvider.selectedIndex]),
-              ],
-            ),
-          )),
       body: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        padding: EdgeInsets.only(top: 10),
         child: Center(
-          child: AspectRatio(
-            aspectRatio: _fileManagementProvider.selectedWidth /
-                _fileManagementProvider.selectedHeight,
-            child: Container(
-                alignment: Alignment.center,
-                constraints: BoxConstraints(
-                    maxHeight: Responsive.isDesktop(context) ? 800 : 400,
-                    maxWidth: Responsive.isDesktop(context) ? 800 : 400),
-                child: Screenshot(
-                  controller: _fileManagementProvider.screenshotController,
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                              _fileManagementProvider.selectedRadius),
-                          child: ImageWidget(
-                              urlOrPath:
-                                  _fileManagementProvider.backgroundImage,
-                              width: _fileManagementProvider.selectedWidth,
-                              height: _fileManagementProvider.selectedHeight,
-                              fit: BoxFit.cover)
-                          // child: Image.asset(
-                          //     _fileManagementProvider.backgroundImage,
-                          //     width: _fileManagementProvider.selectedWidth,
-                          //     height: _fileManagementProvider.selectedHeight,
-                          //     fit: BoxFit.cover),
-                          ),
-                      Container(
-                        width: _fileManagementProvider.selectedWidth,
-                        height: _fileManagementProvider.selectedHeight,
-                        padding: const EdgeInsets.all(50),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                                _fileManagementProvider.selectedRadius),
-                            color: _fileManagementProvider.selectedColor),
-                      ),
-                      Container(
-                        alignment: _fileManagementProvider.align,
-                        width: _fileManagementProvider.selectedWidth,
-                        height: _fileManagementProvider.selectedHeight,
-                        padding: EdgeInsets.symmetric(
-                            horizontal:
-                                _fileManagementProvider.horizontalPadding,
-                            vertical: _fileManagementProvider.verticalPadding),
-                        child: TextField(
-                          controller: quoteController,
-                          maxLines: 10,
-                          minLines: 1,
-                          decoration: InputDecoration(
-                              fillColor: Colors.transparent,
-                              border: InputBorder.none,
-                              hoverColor: Colors.transparent,
-                          ),
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.getFont(
-                              _fileManagementProvider.selectedFont,
-                              color: _fileManagementProvider.selectedTextColor,
-                              fontSize:
-                                  _fileManagementProvider.selectedFontSize,
-                              fontWeight:
-                                  _fileManagementProvider.selectedFontWeight,
-                              height:
-                                  _fileManagementProvider.selectedLineHeight),
-                        ),
-                      )
-                    ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              getEditor(_fileManagementProvider, isGeneration: !editing),
+              Container(
+                height: 40.h,
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  color: Colors.white,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        MyMenuBar(),
+                        Divider(),
+                        Container(
+                          height: 30.h,
+                          child: items(_fileManagementProvider)[
+                              _drawerProvider.selectedIndex],
+                        )
+                      ],
+                    ),
                   ),
-                )),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  Padding getEditor(FileManagementProvider _fileManagementProvider,
+      {bool isGeneration = false, bool isFinal = false}) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ClipRRect(
+              borderRadius:
+                  BorderRadius.circular(_fileManagementProvider.selectedRadius),
+              child: ImageWidget(
+                  urlOrPath: _fileManagementProvider.backgroundImage,
+                  width: _fileManagementProvider.selectedWidth,
+                  height: _fileManagementProvider.selectedHeight,
+                  fit: BoxFit.cover)
+              // child: Image.asset(
+              //     _fileManagementProvider.backgroundImage,
+              //     width: _fileManagementProvider.selectedWidth,
+              //     height: _fileManagementProvider.selectedHeight,
+              //     fit: BoxFit.cover),
+              ),
+          Container(
+            width: _fileManagementProvider.selectedWidth,
+            height: _fileManagementProvider.selectedHeight,
+            padding: const EdgeInsets.all(50),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(
+                    _fileManagementProvider.selectedRadius),
+                color: _fileManagementProvider.selectedColor),
+          ),
+          getTextWidget(isGeneration, isFinal, _fileManagementProvider),
+        ],
+      ),
+    );
+  }
+
+  Widget getTextWidget(bool isGeneration, bool isFinal,
+      FileManagementProvider _fileManagementProvider) {
+    return isGeneration
+        ? Container(
+            width: _fileManagementProvider.selectedWidth,
+            height: _fileManagementProvider.selectedHeight,
+            child: OverlayWidget(
+              isFinal: isFinal,
+              notifier: notifier,
+              widget: Text(
+                quoteController.text,
+                maxLines: 10,
+                style: GoogleFonts.getFont(_fileManagementProvider.selectedFont,
+                    color: _fileManagementProvider.selectedTextColor,
+                    fontSize: _fileManagementProvider.selectedFontSize,
+                    fontWeight: _fileManagementProvider.selectedFontWeight,
+                    height: _fileManagementProvider.selectedLineHeight),
+              ),
+            ),
+          )
+        : Container(
+            width: _fileManagementProvider.selectedWidth,
+            height: _fileManagementProvider.selectedHeight,
+            padding: EdgeInsets.symmetric(
+                horizontal: _fileManagementProvider.horizontalPadding,
+                vertical: _fileManagementProvider.verticalPadding),
+            child: TextField(
+              controller: quoteController,
+              maxLines: 10,
+              expands: false,
+              minLines: 1,
+              decoration: InputDecoration(
+                fillColor: Colors.transparent,
+                border: InputBorder.none,
+                hoverColor: Colors.transparent,
+              ),
+              textAlign: TextAlign.start,
+              style: GoogleFonts.getFont(_fileManagementProvider.selectedFont,
+                  color: _fileManagementProvider.selectedTextColor,
+                  fontSize: _fileManagementProvider.selectedFontSize,
+                  fontWeight: _fileManagementProvider.selectedFontWeight,
+                  height: _fileManagementProvider.selectedLineHeight),
+            ),
+          );
   }
 
   _openColorPicker(FileManagementProvider provider, ColorType type) {
@@ -438,24 +452,6 @@ class _QuotePageState extends State<QuotePage> {
                     max: 100,
                     divisions: 90,
                     onChanged: _fileManagementProvider.fontSizeChange),
-                const Divider(),
-                const SizedBox(height: 20),
-                const Text('Text alignment'),
-                ButtonBar(alignment: MainAxisAlignment.center, children: [
-                  TextButton(
-                      onPressed: () => _fileManagementProvider
-                          .textPositionChange(Alignment.topCenter),
-                      child: const Text("Top")),
-                  TextButton(
-                      onPressed: () => _fileManagementProvider
-                          .textPositionChange(Alignment.center),
-                      child: const Text("Center")),
-                  TextButton(
-                      onPressed: () => _fileManagementProvider
-                          .textPositionChange(Alignment.bottomCenter),
-                      child: const Text("Bottom")),
-                ]),
-                const Divider(),
                 const SizedBox(height: 20),
                 const Text('Horizontal and Vertical Padding'),
                 Row(
@@ -484,16 +480,7 @@ class _QuotePageState extends State<QuotePage> {
                     ),
                   ],
                 ),
-                GestureDetector(
-                  onTap: () {
-                    !_fileManagementProvider.isProcessing
-                        ? _fileManagementProvider.generatePicture()
-                        : null;
-                  },
-                  child: FloatingActionButton.extended(
-                      onPressed: _fileManagementProvider.generatePicture,
-                      label: const Text('Generate')),
-                ),
+                SizedBox(height: 50,)
               ],
             ),
           ),
@@ -519,6 +506,7 @@ class _QuotePageState extends State<QuotePage> {
                   child: Text(
                     font,
                     textAlign: TextAlign.center,
+                    style:  GoogleFonts.getFont(font),
                   )),
             );
           },
@@ -535,22 +523,6 @@ class _QuotePageState extends State<QuotePage> {
                 itemCount: assetImages.length,
                 itemBuilder: (context, index) {
                   String image = assetImages[index];
-                  return InkWell(
-                      onTap: () =>
-                          _fileManagementProvider.backgroundImageChange(image),
-                      child: ImageWidget(urlOrPath: image));
-                },
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: GridView.builder(
-                controller: ScrollController(),
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3, crossAxisSpacing: 5, mainAxisSpacing: 5),
-                itemCount: networkImages.length,
-                itemBuilder: (context, index) {
-                  String image = networkImages[index];
                   return InkWell(
                       onTap: () =>
                           _fileManagementProvider.backgroundImageChange(image),
