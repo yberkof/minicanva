@@ -48,6 +48,7 @@ dependencies:
   path_provider:
   sizer:
   image_picker:
+  google_mobile_ads:
 #  firebase_analytics: ^9.1.9
 #  firebase_core: ^1.18.0
   cached_network_image: ^3.2.0

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:quotesmaker/layout/menubar.dart';
 import 'package:quotesmaker/layout/overlay_widget.dart';
 import 'package:quotesmaker/provider/drawer_provider.dart';
@@ -30,11 +31,68 @@ class _QuotePageState extends State<QuotePage> {
   var quoteController = TextEditingController();
   final ValueNotifier<Matrix4> notifier = ValueNotifier(Matrix4.identity());
   bool editing = true;
+  InterstitialAd? _interstitialAd;
+  bool adLoaded = false;
+
+  load() {
+      InterstitialAd.load(
+          adUnitId: 'ca-app-pub-3940256099942544/1033173712',
+          request: const AdRequest(),
+          adLoadCallback: InterstitialAdLoadCallback(
+            // Called when an ad is successfully received.
+            onAdLoaded: (ad) {
+              ad.fullScreenContentCallback = FullScreenContentCallback(
+                // Called when the ad showed the full screen content.
+                  onAdShowedFullScreenContent: (ad) {
+                    final FileManagementProvider _fileManagementProvider =
+                    Provider.of<FileManagementProvider>(context);
+                    // Dispose the ad here to free resources.
+                    _fileManagementProvider.generatePicture(
+                        getEditor(_fileManagementProvider,
+                            isGeneration: true, isFinal: true),
+                        context);
+                    print("onAdShowedFullScreenContent");
+                  },
+                  // Called when an impression occurs on the ad.
+                  onAdImpression: (ad) {
+                    print("onAdImpression");
+                  },
+                  // Called when the ad failed to show full screen content.
+                  onAdFailedToShowFullScreenContent: (ad, err) {
+                    // Dispose the ad here to free resources.
+                    print("onAdFailedToShowFullScreenContent");
+
+                    ad.dispose();
+                  },
+                  // Called when the ad dismissed full screen content.
+                  onAdDismissedFullScreenContent: (ad) {
+
+                    print("onAdDismissedFullScreenContent");
+
+                    ad.dispose();
+                  },
+                  onAdWillDismissFullScreenContent: (ad) {
+                    print("onAdWillDismissFullScreenContent");
+
+                  },
+                  // Called when a click is recorded for an ad.
+                  onAdClicked: (ad) {});
+              debugPrint('$ad loaded.');
+              // Keep a reference to the ad so you can show it later.
+              _interstitialAd = ad;
+            },
+            // Called when an ad request failed.
+            onAdFailedToLoad: (LoadAdError error) {
+              debugPrint('InterstitialAd failed to load: $error');
+            },
+          ));
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    load();
     quoteController.text = "Lorem Ipsum";
   }
 
@@ -68,13 +126,10 @@ class _QuotePageState extends State<QuotePage> {
           visible: !_fileManagementProvider.isProcessing,
           child: FloatingActionButton.extended(
               onPressed: () {
-                _fileManagementProvider.generatePicture(
-                    getEditor(_fileManagementProvider,
-                        isGeneration: true, isFinal: true),
-                    context);
+                _interstitialAd!.show();
               },
               label: const Text('Generate'))),
-      body: Padding(
+      body:Padding(
         padding: EdgeInsets.only(top: 10),
         child: Center(
           child: Column(
@@ -480,7 +535,9 @@ class _QuotePageState extends State<QuotePage> {
                     ),
                   ],
                 ),
-                SizedBox(height: 50,)
+                SizedBox(
+                  height: 50,
+                )
               ],
             ),
           ),
@@ -506,7 +563,7 @@ class _QuotePageState extends State<QuotePage> {
                   child: Text(
                     font,
                     textAlign: TextAlign.center,
-                    style:  GoogleFonts.getFont(font),
+                    style: GoogleFonts.getFont(font),
                   )),
             );
           },

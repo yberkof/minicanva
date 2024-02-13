@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:quotesmaker/provider/drawer_provider.dart';
 import 'package:quotesmaker/provider/file_management_provider.dart';
 import 'package:quotesmaker/layout/quote.dart';
@@ -19,6 +20,9 @@ void main() async {
   //         appId: dotenv.get('appId'),
   //         messagingSenderId: dotenv.get('messagingSenderId'),
   //         projectId: dotenv.get('projectId')));
+  MobileAds.instance.initialize();
+  MobileAds.instance.updateRequestConfiguration(
+      RequestConfiguration(testDeviceIds: ['F5EF007E0E63D6959D3CCDD3FF79216D']));
   runApp(const MyApp());
 }
 
