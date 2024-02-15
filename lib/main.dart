@@ -1,3 +1,8 @@
+
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -7,11 +12,14 @@ import 'package:quotesmaker/layout/quote.dart';
 import 'package:quotesmaker/provider/m_themes.dart';
 import 'package:sizer/sizer.dart';
 import 'package:url_strategy/url_strategy.dart';
-
+CollectionReference users = FirebaseFirestore.instance.collection('settings');
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+ await Firebase.initializeApp();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   setPathUrlStrategy();
+  var documentSnapshot = (await users.doc('Default').get()).data() as Map<String,dynamic>;
+  print("Firestore: " +documentSnapshot.toString());
   // await dotenv.load(fileName: ".env");
   //
   // await Firebase.initializeApp(

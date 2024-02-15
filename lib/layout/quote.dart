@@ -44,13 +44,7 @@ class _QuotePageState extends State<QuotePage> {
               ad.fullScreenContentCallback = FullScreenContentCallback(
                 // Called when the ad showed the full screen content.
                   onAdShowedFullScreenContent: (ad) {
-                    final FileManagementProvider _fileManagementProvider =
-                    Provider.of<FileManagementProvider>(context);
-                    // Dispose the ad here to free resources.
-                    _fileManagementProvider.generatePicture(
-                        getEditor(_fileManagementProvider,
-                            isGeneration: true, isFinal: true),
-                        context);
+
                     print("onAdShowedFullScreenContent");
                   },
                   // Called when an impression occurs on the ad.
@@ -126,7 +120,15 @@ class _QuotePageState extends State<QuotePage> {
           visible: !_fileManagementProvider.isProcessing,
           child: FloatingActionButton.extended(
               onPressed: () {
+
                 _interstitialAd!.show();
+                final FileManagementProvider _fileManagementProvider =
+                Provider.of<FileManagementProvider>(context);
+                // Dispose the ad here to free resources.
+                _fileManagementProvider.generatePicture(
+                    getEditor(_fileManagementProvider,
+                        isGeneration: true, isFinal: true),
+                    context);
               },
               label: const Text('Generate'))),
       body:Padding(
