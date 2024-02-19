@@ -1,10 +1,4 @@
-import 'dart:convert';
-import 'dart:developer';
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:csv/csv.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -17,8 +11,11 @@ import 'package:quotesmaker/provider/file_management_provider.dart';
 import 'package:quotesmaker/provider/m_themes.dart';
 import 'package:quotesmaker/utils/image_widget.dart';
 import 'package:quotesmaker/utils/responsive.dart';
-import 'package:screenshot/screenshot.dart';
 import 'package:sizer/sizer.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../configuration/app_configuration.dart';
+import '../utils/dialog_utils.dart';
 
 class QuotePage extends StatefulWidget {
   const QuotePage({Key? key}) : super(key: key);
@@ -33,6 +30,26 @@ class _QuotePageState extends State<QuotePage> {
   bool editing = true;
   InterstitialAd? _interstitialAd;
   bool adLoaded = false;
+  loadAppUpdates(BuildContext context) async {
+    final CollectionReference users =
+    FirebaseFirestore.instance.collection('settings');
+    var documentSnapshot =
+    (await users.doc('Default').get()).data() as Map<String, dynamic>;
+    if (documentSnapshot[APP_VERSION_KEY] != APP_VERSION) {
+      print("not the same");
+      DialogUtils.showInfoDialog(
+          title: "You need to update the app",
+          message: "Please update the app to enjoy the new features",
+          context: context, btnOkOnPress: () async {
+            print("Opening");
+        final Uri _url = Uri.parse(documentSnapshot[APP_LINK_KEY]);
+
+        if (!await launchUrl(_url)) {
+          throw Exception('Could not launch $_url');
+        }
+      });
+    }
+  }
 
   load() {
       InterstitialAd.load(
@@ -56,14 +73,12 @@ class _QuotePageState extends State<QuotePage> {
                     // Dispose the ad here to free resources.
                     print("onAdFailedToShowFullScreenContent");
 
-                    ad.dispose();
                   },
                   // Called when the ad dismissed full screen content.
                   onAdDismissedFullScreenContent: (ad) {
 
                     print("onAdDismissedFullScreenContent");
 
-                    ad.dispose();
                   },
                   onAdWillDismissFullScreenContent: (ad) {
                     print("onAdWillDismissFullScreenContent");
@@ -87,6 +102,7 @@ class _QuotePageState extends State<QuotePage> {
     // TODO: implement initState
     super.initState();
     load();
+    loadAppUpdates(context);
     quoteController.text = "Lorem Ipsum";
   }
 
@@ -122,8 +138,6 @@ class _QuotePageState extends State<QuotePage> {
               onPressed: () {
 
                 _interstitialAd!.show();
-                final FileManagementProvider _fileManagementProvider =
-                Provider.of<FileManagementProvider>(context);
                 // Dispose the ad here to free resources.
                 _fileManagementProvider.generatePicture(
                     getEditor(_fileManagementProvider,

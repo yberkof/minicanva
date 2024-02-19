@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,45 +5,47 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:quotesmaker/configuration/app_configuration.dart';
 import 'package:quotesmaker/provider/drawer_provider.dart';
 import 'package:quotesmaker/provider/file_management_provider.dart';
 import 'package:quotesmaker/layout/quote.dart';
 import 'package:quotesmaker/provider/m_themes.dart';
+import 'package:quotesmaker/utils/dialog_utils.dart';
 import 'package:sizer/sizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:url_strategy/url_strategy.dart';
-CollectionReference users = FirebaseFirestore.instance.collection('settings');
+
+import 'firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
- await Firebase.initializeApp();
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  await Firebase.initializeApp(options:DefaultFirebaseOptions.currentPlatform);
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   setPathUrlStrategy();
-  var documentSnapshot = (await users.doc('Default').get()).data() as Map<String,dynamic>;
-  print("Firestore: " +documentSnapshot.toString());
-  // await dotenv.load(fileName: ".env");
-  //
-  // await Firebase.initializeApp(
-  //     options: FirebaseOptions(
-  //         apiKey: dotenv.get('apiKey'),
-  //         appId: dotenv.get('appId'),
-  //         messagingSenderId: dotenv.get('messagingSenderId'),
-  //         projectId: dotenv.get('projectId')));
   MobileAds.instance.initialize();
-  MobileAds.instance.updateRequestConfiguration(
-      RequestConfiguration(testDeviceIds: ['F5EF007E0E63D6959D3CCDD3FF79216D']));
-  runApp(const MyApp());
+  MobileAds.instance.updateRequestConfiguration(RequestConfiguration(
+      testDeviceIds: ['F5EF007E0E63D6959D3CCDD3FF79216D']));
+  await Firebase.initializeApp();
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+
+
+  MyApp({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
     return Sizer(
-      builder:(context, orientation, deviceType) =>  MultiProvider(
+      builder: (context, orientation, deviceType) => MultiProvider(
           providers: [
             ChangeNotifierProvider(create: (context) => DrawerProvider()),
-            ChangeNotifierProvider(create: (context) => FileManagementProvider()),
-            ChangeNotifierProvider(create: (context) => MthemesProvider()),
+            ChangeNotifierProvider(
+                create: (context) => FileManagementProvider()),
+            ChangeNotifierProvider(create: (context) => MthemesProvider())
           ],
           builder: (context, child) {
             final _themeProvider = Provider.of<MthemesProvider>(context);
