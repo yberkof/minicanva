@@ -14,7 +14,7 @@ class ImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if(urlOrPath is Uint8List ){
+    if(urlOrPath is Uint8List){
       return Image.memory(urlOrPath, fit: fit ?? BoxFit.fitHeight, width: width, height: height);
     }
     else

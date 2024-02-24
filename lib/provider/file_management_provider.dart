@@ -161,7 +161,9 @@ class FileManagementProvider extends ChangeNotifier {
       await capturedFile.writeAsBytes(output);
       print(capturedFile.path);
       final result = await SaverGallery.saveImage(output,
-          quality: 60, name: "file_name${DateTime.now()}", androidExistNotSave: false);
+          quality: 60,
+          name: "file_name${DateTime.now()}",
+          androidExistNotSave: false);
       print(result);
       print('png done');
     } catch (e) {
@@ -169,16 +171,13 @@ class FileManagementProvider extends ChangeNotifier {
     }
     processingChange(false);
   }
-
 }
 
 List<String> assetImages = [
   'assets/custom.png',
   'assets/random.png',
-  'assets/t1.png',
-  'assets/t2.png',
+  'https://firebasestorage.googleapis.com/v0/b/fire-base-test-601b7.appspot.com/o/backgrounds%2Ft1.png?alt=media&token=57ee67ca-03b7-4838-a926-6b5f1af92c5e'
 ];
-
 
 // All our dreams can come true, if we have the courage to pursue them.
 // The secret of getting ahead is getting started.
