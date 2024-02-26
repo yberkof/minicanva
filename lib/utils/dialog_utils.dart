@@ -150,7 +150,7 @@ class DialogUtils {
               "Ok",
               style: TextStyle(
                 fontSize: 30,
-                color: _getColor(50),
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),

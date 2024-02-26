@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:quotesmaker/utils/dialog_utils.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -169,6 +170,7 @@ class FileManagementProvider extends ChangeNotifier {
     } catch (e) {
       print(e);
     }
+    DialogUtils.showSuccessDialog(title: 'Your Image Has been saved successfully', context: context);
     processingChange(false);
   }
 }
@@ -176,7 +178,7 @@ class FileManagementProvider extends ChangeNotifier {
 List<String> assetImages = [
   'assets/custom.png',
   'assets/random.png',
-  'https://firebasestorage.googleapis.com/v0/b/fire-base-test-601b7.appspot.com/o/backgrounds%2Ft1.png?alt=media&token=57ee67ca-03b7-4838-a926-6b5f1af92c5e'
+  'assets/t4.png',
 ];
 
 // All our dreams can come true, if we have the courage to pursue them.

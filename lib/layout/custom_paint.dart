@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 class ZoomPaint extends CustomPainter {
 
   var key;
-  var image;
-  ZoomPaint({required this.key,required this.image});
+  ZoomPaint({required this.key});
   @override
   void paint(Canvas canvas, Size size) {
     final keyContext = key.currentContext;
@@ -13,15 +12,10 @@ class ZoomPaint extends CustomPainter {
     final box = keyContext?.findRenderObject() as RenderBox;
     var rectWidth=box.size.width;
     var rectHeight=box.size.height;
-    final rect = Rect.fromLTRB(
-      0,0,150,100
-
-      );
     const radius = 4.0;
-    const strokeWidth = 6.0;
-    const extend = radius + 24.0;
+    const strokeWidth = 4.0;
+    const extend = radius + 16.0;
     const arcSize = Size.square(radius );
-    canvas.drawImage(image, new Offset(0.0, 0.0), new Paint());
     canvas.drawPath(
       Path()
         ..fillType = PathFillType.evenOdd
@@ -36,7 +30,7 @@ class ZoomPaint extends CustomPainter {
     );
 
     canvas.save();
-    canvas.translate(rect.left, rect.top);
+    // canvas.translate(rect.left, rect.top);
     final path = Path();
     for (var i = 0; i < 4; i++) {
       final l = i & 1 == 0;
