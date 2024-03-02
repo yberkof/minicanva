@@ -1,3 +1,4 @@
 const String APP_VERSION='1.0.0';
 const String APP_VERSION_KEY='APP_VERSION';
 const String APP_LINK_KEY='APP_LINK';
+const String GENERATE_UNIT_ID='ca-app-pub-3952374135015188/4015361466';
